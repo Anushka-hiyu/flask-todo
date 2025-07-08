@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///hiyu.db"
@@ -17,7 +18,7 @@ class Todo(db.Model):
     def __repr__(self) -> str:
         return f"{self.sno} - {self.title}"
 
-# Home route: add + show todos
+
 @app.route("/", methods=['GET', 'POST'])
 def hello_hiyu():
     if request.method == 'POST':
@@ -29,14 +30,14 @@ def hello_hiyu():
     allTodo = Todo.query.all()
     return render_template('index.html', allTodo=allTodo)
 
-# Show route (optional)
+
 @app.route("/show")
 def show():
     allTodo = Todo.query.all()
     print(allTodo)
     return "<b><p>This is products page!</b></p>"
 
-# Update route
+
 @app.route("/update/<int:sno>", methods=['GET', 'POST'])
 def update(sno):
     todo = Todo.query.filter_by(sno=sno).first()
@@ -47,7 +48,7 @@ def update(sno):
         return redirect(url_for('hello_hiyu'))
     return render_template('update.html', todo=todo)
 
-# Delete route
+
 @app.route("/delete/<int:sno>")
 def delete(sno):
     todo = Todo.query.filter_by(sno=sno).first()
@@ -55,8 +56,8 @@ def delete(sno):
     db.session.commit()
     return redirect(url_for('hello_hiyu'))
 
-# Run the app
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True, port=8000)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT',10000)))
